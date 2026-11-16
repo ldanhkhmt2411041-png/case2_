@@ -1,5 +1,8 @@
 const Task = require('../models/Task');
 const TaskShare = require('../models/TaskShare');
+const User = require('../models/User');
+const { createNotification } = require('../services/notificationService');
+const { sendEmail } = require('../services/emailService');
 
 // Helper to determine user's role on a task
 const getUserPermission = async (task, userId) => {
@@ -171,6 +174,10 @@ exports.updateTask = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Ban khong co quyen chinh sua cong viec nay' });
     }
 
+    const oldDueDate = task.dueDate ? new Date(task.dueDate).getTime() : null;
+    const newDueDate = req.body.dueDate ? new Date(req.body.dueDate).getTime() : null;
+    const isDueDateChanged = oldDueDate !== newDueDate;
+
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -179,6 +186,44 @@ exports.updateTask = async (req, res) => {
       .populate('createdBy', 'fullName email')
       .populate('assigneeIds', 'fullName email')
       .populate('primaryAssigneeId', 'fullName email');
+
+    // Thong bao khi thong tin quan trong hoac han hoan thanh thay doi
+    if (isDueDateChanged) {
+      const recipientIds = [];
+      if (updatedTask.assigneeIds && updatedTask.assigneeIds.length > 0) {
+        updatedTask.assigneeIds.forEach(u => recipientIds.push(u));
+      }
+      if (updatedTask.createdBy && updatedTask.createdBy._id.toString() !== req.user.id) {
+        recipientIds.push(updatedTask.createdBy);
+      }
+
+      for (const recipient of recipientIds) {
+        if (recipient._id.toString() !== req.user.id) {
+          await createNotification({
+            userId: recipient._id,
+            taskId: updatedTask._id,
+            type: 'update',
+            title: `Thay doi han hoan thanh: ${updatedTask.title}`,
+            message: `Han hoan thanh da duoc cap nhat thanh: ${updatedTask.dueDate ? new Date(updatedTask.dueDate).toLocaleDateString('vi-VN') : 'Khong xac dinh'}`
+          });
+
+          if (recipient.email) {
+            await sendEmail({
+              recipientEmail: recipient.email,
+              subject: `[TaskManager] Thay đổi hạn hoàn thành: ${updatedTask.title}`,
+              html: `
+                <h3>Cập nhật thông tin công việc</h3>
+                <p>Xin chào <strong>${recipient.fullName || recipient.email}</strong>,</p>
+                <p>Công việc <strong>${updatedTask.title}</strong> vừa được cập nhật hạn hoàn thành mới: <strong>${updatedTask.dueDate ? new Date(updatedTask.dueDate).toLocaleDateString('vi-VN') : 'Không xác định'}</strong>.</p>
+                <p>Vui lòng kiểm tra lại tiến độ để hoàn thành đúng hạn.</p>
+              `,
+              taskId: updatedTask._id,
+              eventType: 'due_date_changed'
+            });
+          }
+        }
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -204,7 +249,6 @@ exports.deleteTask = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Chi nguoi tao moi co quyen xoa cong viec' });
     }
 
-    // Xoa cac chia se lien quan
     await TaskShare.deleteMany({ taskId: req.params.id });
     await task.deleteOne();
 
@@ -237,6 +281,7 @@ exports.updateTaskStatus = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Ban khong co quyen cap nhat trang thai' });
     }
 
+    const oldStatus = task.status;
     task.status = status;
     await task.save();
 
@@ -244,6 +289,46 @@ exports.updateTaskStatus = async (req, res) => {
       .populate('createdBy', 'fullName email')
       .populate('assigneeIds', 'fullName email')
       .populate('primaryAssigneeId', 'fullName email');
+
+    // Thong bao khi cong viec hoan thanh
+    if (status === 'completed' && oldStatus !== 'completed') {
+      const notifyUsers = [];
+      if (populatedTask.createdBy && populatedTask.createdBy._id.toString() !== req.user.id) {
+        notifyUsers.push(populatedTask.createdBy);
+      }
+      if (populatedTask.assigneeIds) {
+        populatedTask.assigneeIds.forEach(u => {
+          if (u._id.toString() !== req.user.id && !notifyUsers.some(nu => nu._id.toString() === u._id.toString())) {
+            notifyUsers.push(u);
+          }
+        });
+      }
+
+      for (const u of notifyUsers) {
+        await createNotification({
+          userId: u._id,
+          taskId: populatedTask._id,
+          type: 'status_change',
+          title: `Cong viec da hoan thanh: ${populatedTask.title}`,
+          message: `Cong viec "${populatedTask.title}" da duoc danh dau la DA HOAN THANH.`
+        });
+
+        if (u.email) {
+          await sendEmail({
+            recipientEmail: u.email,
+            subject: `[TaskManager] Công việc đã hoàn thành: ${populatedTask.title}`,
+            html: `
+              <h3>Thông báo hoàn thành công việc</h3>
+              <p>Xin chào <strong>${u.fullName || u.email}</strong>,</p>
+              <p>Công việc <strong>${populatedTask.title}</strong> vừa được hoàn thành thành công!</p>
+              <p>Cảm ơn sự đóng góp của bạn.</p>
+            `,
+            taskId: populatedTask._id,
+            eventType: 'task_completed'
+          });
+        }
+      }
+    }
 
     res.status(200).json({ success: true, data: populatedTask });
   } catch (error) {

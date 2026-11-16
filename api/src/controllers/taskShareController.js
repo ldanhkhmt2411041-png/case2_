@@ -1,5 +1,8 @@
 const TaskShare = require('../models/TaskShare');
 const Task = require('../models/Task');
+const User = require('../models/User');
+const { createNotification } = require('../services/notificationService');
+const { sendEmail } = require('../services/emailService');
 
 exports.getShares = async (req, res) => {
   try {
@@ -32,6 +35,36 @@ exports.addShare = async (req, res) => {
       { permission: permission || 'viewer', sharedBy: req.user.id },
       { new: true, upsert: true }
     );
+
+    // Gui thong bao va email cho nguoi duoc chia se
+    const sharedUser = await User.findById(userId);
+    if (sharedUser) {
+      const permText = (permission === 'editor') ? 'Chỉnh sửa (Editor)' : 'Chỉ xem (Viewer)';
+
+      await createNotification({
+        userId: sharedUser._id,
+        taskId: task._id,
+        type: 'sharing',
+        title: `Ban duoc chia se cong viec: ${task.title}`,
+        message: `${req.user.name || req.user.fullName || 'Nguoi dung'} da chia se cong viec "${task.title}" voi quyen ${permText}.`
+      });
+
+      await sendEmail({
+        recipientEmail: sharedUser.email,
+        subject: `[TaskManager] Bạn được chia sẻ công việc: ${task.title}`,
+        html: `
+          <h3>Thông báo chia sẻ công việc</h3>
+          <p>Xin chào <strong>${sharedUser.fullName || sharedUser.email}</strong>,</p>
+          <p>Bạn đã được mời tham gia công việc: <strong>${task.title}</strong></p>
+          <p><strong>Quyền truy cập:</strong> ${permText}</p>
+          <p><strong>Mô tả:</strong> ${task.description || 'Không có mô tả'}</p>
+          <p><strong>Hạn hoàn thành:</strong> ${task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : 'Không giới hạn'}</p>
+          <p>Vui lòng đăng nhập ứng dụng TaskManager để xem chi tiết.</p>
+        `,
+        taskId: task._id,
+        eventType: 'task_shared'
+      });
+    }
 
     res.status(200).json({ success: true, data: share });
   } catch (error) {

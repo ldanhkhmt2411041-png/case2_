@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./src/config/db');
+const { startReminderScheduler } = require('./src/services/reminderService');
 
 dotenv.config();
 connectDB();
@@ -13,6 +14,8 @@ app.use(express.json());
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/users', require('./src/routes/userRoutes'));
 app.use('/api/tasks', require('./src/routes/taskRoutes'));
+app.use('/api/notifications', require('./src/routes/notificationRoutes'));
+app.use('/api/email-logs', require('./src/routes/emailLogRoutes'));
 
 app.get('/', (req, res) => {
   res.send('API TaskManager dang hoat dong!');
@@ -21,4 +24,6 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server dang chay tai cong ${PORT}`);
+  // Khoi dong scheduler tu dong kiem tra deadline 24h
+  startReminderScheduler();
 });

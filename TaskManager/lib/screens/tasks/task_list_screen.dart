@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../models/task.dart';
 import '../../services/auth_service.dart';
+import '../../services/notification_service.dart';
 import '../../services/task_service.dart';
+import '../notifications/notification_screen.dart';
 import 'task_create_screen.dart';
 import 'task_detail_screen.dart';
 
@@ -15,6 +17,7 @@ class TaskListScreen extends StatefulWidget {
 class _TaskListScreenState extends State<TaskListScreen> {
   List<Task> _tasks = [];
   bool _isLoading = true;
+  int _unreadNotificationsCount = 0;
   String _selectedStatus = '';
   String _selectedPriority = '';
   String _selectedScope = ''; // '', 'created', 'assigned', 'shared'
@@ -27,13 +30,25 @@ class _TaskListScreenState extends State<TaskListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTasks();
+    _loadData();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadData() async {
+    _loadTasks();
+    _loadUnreadCount();
+  }
+
+  Future<void> _loadUnreadCount() async {
+    final count = await NotificationService.getUnreadCount();
+    if (mounted) {
+      setState(() => _unreadNotificationsCount = count);
+    }
   }
 
   Future<void> _loadTasks() async {
@@ -66,7 +81,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
     final success = await TaskService.updateTaskStatus(task.id, nextStatus);
     if (success && mounted) {
-      _loadTasks();
+      _loadData();
     }
   }
 
@@ -100,9 +115,50 @@ class _TaskListScreenState extends State<TaskListScreen> {
       appBar: AppBar(
         title: const Text('Quan Ly Cong Viec'),
         actions: [
+          // Notification Icon with Badge
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                tooltip: 'Thong bao',
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                  );
+                  _loadData();
+                },
+              ),
+              if (_unreadNotificationsCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      _unreadNotificationsCount > 9 ? '9+' : '$_unreadNotificationsCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadTasks,
+            onPressed: _loadData,
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -259,7 +315,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 : _tasks.isEmpty
                     ? const Center(child: Text('Khong co cong viec nao'))
                     : RefreshIndicator(
-                        onRefresh: _loadTasks,
+                        onRefresh: _loadData,
                         child: ListView.builder(
                           padding: const EdgeInsets.all(8),
                           itemCount: _tasks.length,
@@ -343,7 +399,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                     ),
                                   );
                                   if (result == true) {
-                                    _loadTasks();
+                                    _loadData();
                                   }
                                 },
                               ),
@@ -360,7 +416,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             context,
             MaterialPageRoute(builder: (context) => const TaskCreateScreen()),
           );
-          if (created == true) _loadTasks();
+          if (created == true) _loadData();
         },
         child: const Icon(Icons.add),
       ),
