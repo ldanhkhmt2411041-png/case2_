@@ -10,10 +10,10 @@ class PriorityBadge extends StatelessWidget {
       case 'high':
         return 'Cao';
       case 'medium':
-        return 'Trung binh';
+        return 'Trung bình';
       case 'low':
       default:
-        return 'Thap';
+        return 'Thấp';
     }
   }
 
@@ -25,7 +25,7 @@ class PriorityBadge extends StatelessWidget {
         return Colors.orange;
       case 'low':
       default:
-        return Colors.grey;
+        return Colors.blue;
     }
   }
 

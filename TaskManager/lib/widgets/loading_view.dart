@@ -9,12 +9,15 @@ class LoadingView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           const CircularProgressIndicator(),
           if (message != null) ...[
             const SizedBox(height: 12),
-            Text(message!, style: const TextStyle(color: Colors.grey)),
+            Text(
+              message!,
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
+            ),
           ],
         ],
       ),

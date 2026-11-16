@@ -1,29 +1,19 @@
 class Validators {
-  static String? validateEmail(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Vui long nhap email';
-    }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value.trim())) {
-      return 'Email khong hop le';
-    }
+  static String? email(String? value) {
+    if (value == null || value.trim().isEmpty) return 'Email là bắt buộc';
+    final regex = RegExp(r'^[\w\-.]+@[\w\-]+\.\w+$');
+    if (!regex.hasMatch(value.trim())) return 'Email không hợp lệ';
     return null;
   }
 
-  static String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Vui long nhap mat khau';
-    }
-    if (value.length < 6) {
-      return 'Mat khau phai co it nhat 6 ky tu';
-    }
+  static String? password(String? value) {
+    if (value == null || value.isEmpty) return 'Mật khẩu là bắt buộc';
+    if (value.length < 6) return 'Mật khẩu phải có ít nhất 6 ký tự';
     return null;
   }
 
-  static String? validateRequired(String? value, String fieldName) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Vui long nhap $fieldName';
-    }
+  static String? required(String? value, [String field = 'Trường này']) {
+    if (value == null || value.trim().isEmpty) return '$field là bắt buộc';
     return null;
   }
 }
