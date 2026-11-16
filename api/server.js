@@ -23,9 +23,12 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
+const HOST = '0.0.0.0'; // Cho phep truy cap tu moi noi (localhost, LAN, emulator, may khac)
+
+const server = app.listen(PORT, HOST, () => {
   console.log(`=======================================================`);
   console.log(`🚀 Server Backend dang chay tai: http://localhost:${PORT}`);
+  console.log(`🌐 Lang nghe ket noi tu moi dia chi IP (0.0.0.0:${PORT})`);
   console.log(`📡 API Base URL: http://localhost:${PORT}/api`);
   console.log(`=======================================================`);
   // Khoi dong scheduler tu dong kiem tra deadline 24h
