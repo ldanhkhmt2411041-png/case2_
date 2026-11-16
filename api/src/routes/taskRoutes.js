@@ -6,7 +6,8 @@ const {
   getTaskById,
   updateTask,
   deleteTask,
-  updateTaskStatus
+  updateTaskStatus,
+  getTaskActivities
 } = require('../controllers/taskController');
 const {
   getAssignees,
@@ -35,6 +36,9 @@ router.route('/:id')
   .delete(deleteTask);
 
 router.patch('/:id/status', updateTaskStatus);
+
+// Lich su hoat dong
+router.get('/:id/activities', getTaskActivities);
 
 // Giao viec routes
 router.route('/:id/assignees')

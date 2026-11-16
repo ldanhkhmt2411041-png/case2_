@@ -179,3 +179,26 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+exports.updateMe = async (req, res) => {
+  try {
+    const { fullName, name, avatarUrl } = req.body;
+    const updateData = {};
+    if (fullName) {
+      updateData.fullName = fullName;
+      updateData.name = fullName;
+    } else if (name) {
+      updateData.fullName = name;
+      updateData.name = name;
+    }
+    if (avatarUrl !== undefined) {
+      updateData.avatarUrl = avatarUrl;
+    }
+
+    const user = await User.findByIdAndUpdate(req.user.id, updateData, { new: true }).select('-password');
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

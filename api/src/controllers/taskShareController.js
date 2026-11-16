@@ -3,6 +3,7 @@ const Task = require('../models/Task');
 const User = require('../models/User');
 const { createNotification } = require('../services/notificationService');
 const { sendEmail } = require('../services/emailService');
+const { logActivity } = require('../services/activityService');
 
 exports.getShares = async (req, res) => {
   try {
@@ -35,6 +36,14 @@ exports.addShare = async (req, res) => {
       { permission: permission || 'viewer', sharedBy: req.user.id },
       { new: true, upsert: true }
     );
+
+    // Ghi log hoat dong
+    await logActivity({
+      taskId,
+      userId: req.user.id,
+      action: 'Chia se cong viec',
+      details: { sharedWithUserId: userId, permission: permission || 'viewer' }
+    });
 
     // Gui thong bao va email cho nguoi duoc chia se
     const sharedUser = await User.findById(userId);
@@ -85,6 +94,14 @@ exports.updateSharePermission = async (req, res) => {
     share.permission = permission;
     await share.save();
 
+    // Ghi log hoat dong
+    await logActivity({
+      taskId: share.taskId,
+      userId: req.user.id,
+      action: 'Doi quyen chia se',
+      details: { permission }
+    });
+
     res.status(200).json({ success: true, data: share });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -100,7 +117,17 @@ exports.removeShare = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Khong tim thay ban ghi chia se' });
     }
 
+    const taskId = share.taskId;
     await share.deleteOne();
+
+    // Ghi log hoat dong
+    await logActivity({
+      taskId,
+      userId: req.user.id,
+      action: 'Thu hoi quyen chia se',
+      details: { shareId }
+    });
+
     res.status(200).json({ success: true, message: 'Thu hoi quyen chia se thanh cong' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

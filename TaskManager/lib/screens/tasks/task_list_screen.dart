@@ -4,6 +4,7 @@ import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/task_service.dart';
 import '../notifications/notification_screen.dart';
+import '../profile/profile_screen.dart';
 import 'task_create_screen.dart';
 import 'task_detail_screen.dart';
 
@@ -156,18 +157,21 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 ),
             ],
           ),
+          // Profile & Stats Icon
+          IconButton(
+            icon: const Icon(Icons.account_circle_outlined),
+            tooltip: 'Ca nhan & Thong ke',
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+              _loadData();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadData,
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await AuthService.logout();
-              if (mounted) {
-                Navigator.of(context).pushReplacementNamed('/');
-              }
-            },
           ),
         ],
       ),

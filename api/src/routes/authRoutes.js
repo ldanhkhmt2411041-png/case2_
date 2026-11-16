@@ -5,6 +5,7 @@ const {
   verifyEmail, 
   login, 
   getMe, 
+  updateMe,
   forgotPassword, 
   resetPassword, 
   changePassword 
@@ -18,6 +19,7 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 
 router.get('/me', protect, getMe);
+router.put('/me', protect, updateMe);
 router.put('/change-password', protect, changePassword);
 
 module.exports = router;

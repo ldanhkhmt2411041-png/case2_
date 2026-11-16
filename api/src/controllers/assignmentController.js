@@ -2,6 +2,7 @@ const Task = require('../models/Task');
 const User = require('../models/User');
 const { createNotification } = require('../services/notificationService');
 const { sendEmail } = require('../services/emailService');
+const { logActivity } = require('../services/activityService');
 
 exports.getAssignees = async (req, res) => {
   try {
@@ -58,6 +59,14 @@ exports.addAssignees = async (req, res) => {
     }
 
     await task.save();
+
+    // Ghi log hoat dong
+    await logActivity({
+      taskId: task._id,
+      userId: req.user.id,
+      action: 'Giao viec',
+      details: { newlyAddedCount: newlyAddedIds.length, primaryAssigneeId }
+    });
 
     // Gui thong bao va email cho nhung nguoi moi duoc giao viec
     if (newlyAddedIds.length > 0) {
@@ -121,6 +130,14 @@ exports.updatePrimaryAssignee = async (req, res) => {
 
     await task.save();
 
+    // Ghi log hoat dong
+    await logActivity({
+      taskId: task._id,
+      userId: req.user.id,
+      action: 'Doi nguoi phu trach chinh',
+      details: { primaryAssigneeId: userId }
+    });
+
     // Thong bao cho nguoi phu trach chinh
     await createNotification({
       userId,
@@ -155,6 +172,15 @@ exports.removeAssignee = async (req, res) => {
     }
 
     await task.save();
+
+    // Ghi log hoat dong
+    await logActivity({
+      taskId: task._id,
+      userId: req.user.id,
+      action: 'Huy giao viec',
+      details: { removedUserId: userId }
+    });
+
     res.status(200).json({ success: true, data: task });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

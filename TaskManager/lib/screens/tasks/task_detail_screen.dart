@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/task.dart';
+import '../../models/task_activity.dart';
+import '../../services/statistics_service.dart';
 import '../../services/task_service.dart';
 import '../assignment/assign_task_screen.dart';
 import '../sharing/task_sharing_screen.dart';
@@ -17,6 +19,7 @@ class TaskDetailScreen extends StatefulWidget {
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late Task _currentTask;
   bool _isLoading = true;
+  List<TaskActivity> _activities = [];
 
   @override
   void initState() {
@@ -28,11 +31,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   Future<void> _refreshTask() async {
     setState(() => _isLoading = true);
     final task = await TaskService.getTaskById(_currentTask.id);
+    final activities = await StatisticsService.getTaskActivities(_currentTask.id);
     if (mounted) {
       setState(() {
         if (task != null) {
           _currentTask = task;
         }
+        _activities = activities;
         _isLoading = false;
       });
     }
@@ -340,6 +345,47 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                             ],
                           ],
                         ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // SECTION 4: Activity History (Lịch sử hoạt động)
+                    Card(
+                      elevation: 1,
+                      child: ExpansionTile(
+                        initiallyExpanded: true,
+                        leading: const Icon(Icons.history, color: Colors.blueGrey),
+                        title: Text(
+                          'Lich su hoat dong (${_activities.length})',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        children: [
+                          if (_activities.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text('Chua co lich su hoat dong nao', style: TextStyle(color: Colors.grey)),
+                            )
+                          else
+                            ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: _activities.length,
+                              separatorBuilder: (_, __) => const Divider(height: 1),
+                              itemBuilder: (context, index) {
+                                final act = _activities[index];
+                                return ListTile(
+                                  dense: true,
+                                  leading: const Icon(Icons.check_circle_outline, size: 18, color: Colors.teal),
+                                  title: Text(act.action, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  subtitle: Text(
+                                    'Boi: ${act.user?.fullName ?? "He thong"}'
+                                    '${act.createdAt != null ? " • ${act.createdAt.toString().split('.')[0]}" : ""}',
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                                );
+                              },
+                            ),
+                        ],
                       ),
                     ),
                   ],

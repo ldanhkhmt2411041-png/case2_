@@ -1,8 +1,10 @@
 const Task = require('../models/Task');
 const TaskShare = require('../models/TaskShare');
+const TaskActivity = require('../models/TaskActivity');
 const User = require('../models/User');
 const { createNotification } = require('../services/notificationService');
 const { sendEmail } = require('../services/emailService');
+const { logActivity } = require('../services/activityService');
 
 // Helper to determine user's role on a task
 const getUserPermission = async (task, userId) => {
@@ -115,6 +117,14 @@ exports.createTask = async (req, res) => {
       primaryAssigneeId: primaryAssigneeId || null
     });
 
+    // Ghi log hoat dong
+    await logActivity({
+      taskId: task._id,
+      userId: req.user.id,
+      action: 'Tao cong viec',
+      details: { title, priority, status }
+    });
+
     const populatedTask = await Task.findById(task._id)
       .populate('createdBy', 'fullName email')
       .populate('assigneeIds', 'fullName email')
@@ -187,6 +197,14 @@ exports.updateTask = async (req, res) => {
       .populate('assigneeIds', 'fullName email')
       .populate('primaryAssigneeId', 'fullName email');
 
+    // Ghi log hoat dong
+    await logActivity({
+      taskId: task._id,
+      userId: req.user.id,
+      action: 'Chinh sua cong viec',
+      details: req.body
+    });
+
     // Thong bao khi thong tin quan trong hoac han hoan thanh thay doi
     if (isDueDateChanged) {
       const recipientIds = [];
@@ -249,6 +267,7 @@ exports.deleteTask = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Chi nguoi tao moi co quyen xoa cong viec' });
     }
 
+    await TaskActivity.deleteMany({ taskId: req.params.id });
     await TaskShare.deleteMany({ taskId: req.params.id });
     await task.deleteOne();
 
@@ -284,6 +303,14 @@ exports.updateTaskStatus = async (req, res) => {
     const oldStatus = task.status;
     task.status = status;
     await task.save();
+
+    // Ghi log hoat dong
+    await logActivity({
+      taskId: task._id,
+      userId: req.user.id,
+      action: 'Doi trang thai',
+      details: { from: oldStatus, to: status }
+    });
 
     const populatedTask = await Task.findById(task._id)
       .populate('createdBy', 'fullName email')
@@ -331,6 +358,25 @@ exports.updateTaskStatus = async (req, res) => {
     }
 
     res.status(200).json({ success: true, data: populatedTask });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Xem lich su hoat dong cua cong viec
+// @route   GET /api/tasks/:id/activities
+// @access  Private
+exports.getTaskActivities = async (req, res) => {
+  try {
+    const activities = await TaskActivity.find({ taskId: req.params.id })
+      .populate('userId', 'fullName email')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: activities.length,
+      data: activities
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
