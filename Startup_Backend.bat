@@ -4,7 +4,7 @@ cd /d "%~dp0api"
 
 echo =======================================================
 echo DANG KHOI DONG BACKEND API (PORT 5000)...
-echo Tu dong ket noi MongoDB Atlas Cloud cua ban
+echo Ket noi MongoDB Atlas Cloud cua ban
 echo =======================================================
 
 if not exist node_modules (
