@@ -36,58 +36,16 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => const TaskListScreen()),
       );
     } else {
-      if (result['isNetworkError'] == true) {
-        _showDemoModeDialog();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? 'Đăng nhập thất bại')),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['message'] ?? 'Dang nhap that bai')),
+      );
     }
-  }
-
-  void _enterDemoMode() {
-    AuthService.enableDemoMode();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const TaskListScreen()),
-    );
-  }
-
-  void _showDemoModeDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.wifi_off, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('Chưa kết nối Backend'),
-          ],
-        ),
-        content: const Text(
-          'Không tìm thấy máy chủ API tại http://localhost:5000 (do bạn đang xem trên FlutLab hoặc chưa bật file 1_Chay_Backend.bat).\n\n'
-          '👉 Bạn có muốn vào thẳng CHẾ ĐỘ DEMO để trải nghiệm toàn bộ 10 màn hình của ứng dụng không?',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Đóng')),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.play_arrow),
-            label: const Text('Vào xem Demo ngay'),
-            onPressed: () {
-              Navigator.pop(ctx);
-              _enterDemoMode();
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Đăng Nhập Task Manager')),
+      appBar: AppBar(title: const Text('Dang Nhap Task Manager')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -97,13 +55,6 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Icon(Icons.task_alt, size: 80, color: Colors.blue),
-                const SizedBox(height: 12),
-                const Center(
-                  child: Text(
-                    'CASE STUDY 2: QUẢN LÝ CÔNG VIỆC',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ),
                 const SizedBox(height: 24),
                 TextFormField(
                   controller: _emailController,
@@ -112,30 +63,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     prefixIcon: Icon(Icons.email),
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) => value == null || value.isEmpty ? 'Vui lòng nhập email' : null,
+                  validator: (value) => value == null || value.isEmpty ? 'Vui long nhap email' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
                   decoration: const InputDecoration(
-                    labelText: 'Mật khẩu',
+                    labelText: 'Mat khau',
                     prefixIcon: Icon(Icons.lock),
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) => value == null || value.isEmpty ? 'Vui lòng nhập mật khẩu' : null,
+                  validator: (value) => value == null || value.isEmpty ? 'Vui long nhap mat khau' : null,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: _isLoading ? const CircularProgressIndicator(color: Colors.white) : const Text('Đăng Nhập'),
+                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+                  child: _isLoading ? const CircularProgressIndicator() : const Text('Dang Nhap'),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -143,21 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       MaterialPageRoute(builder: (context) => const RegisterScreen()),
                     );
                   },
-                  child: const Text('Chưa có tài khoản? Đăng ký ngay'),
-                ),
-                const Divider(height: 32),
-                // Nut Demo Mode danh cho FlutLab
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.visibility, color: Colors.teal),
-                  label: const Text(
-                    'Xem thử toàn bộ 10 màn hình (Chế độ Demo / FlutLab)',
-                    style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: const BorderSide(color: Colors.teal),
-                  ),
-                  onPressed: _enterDemoMode,
+                  child: const Text('Chua co tai khoan? Dang ky ngay'),
                 ),
               ],
             ),
