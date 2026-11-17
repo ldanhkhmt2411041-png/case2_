@@ -64,7 +64,7 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
   Future<void> _addShare(User user) async {
     if (_shares.any((s) => s.user != null && s.user!.id == user.id)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nguoi dung nay da duoc chia se cong viec')),
+        const SnackBar(content: Text('Người dùng này đã được chia sẻ công việc')),
       );
       return;
     }
@@ -77,7 +77,7 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Da chia se cong viec voi ${user.fullName} (${_selectedPermission == 'editor' ? 'Chinh sua' : 'Chi xem'})')),
+        SnackBar(content: Text('Đã chia sẻ công việc với ${user.fullName} (${_selectedPermission == 'editor' ? 'Chỉnh sửa' : 'Chỉ xem'})')),
       );
       _searchController.clear();
       setState(() => _searchResults = []);
@@ -94,7 +94,7 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Da doi quyen thanh: ${newPermission == 'editor' ? 'Chinh sua' : 'Chi xem'}')),
+        SnackBar(content: Text('Đã đổi quyền thành: ${newPermission == 'editor' ? 'Chỉnh sửa' : 'Chỉ xem'}')),
       );
       _loadShares();
     }
@@ -104,11 +104,14 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Thu hoi chia se'),
-        content: Text('Thu hoi quyen truy cap cua ${share.user?.fullName ?? "nguoi dung"}?'),
+        title: const Text('Thu hồi chia sẻ'),
+        content: Text('Thu hồi quyền truy cập của ${share.user?.fullName ?? "người dùng"}?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Huy')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Thu hoi', style: TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Hủy')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Thu hồi', style: TextStyle(color: Colors.red)),
+          ),
         ],
       ),
     );
@@ -125,7 +128,8 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chia Se & Phan Quyen'),
+        title: const Text('Chia Sẻ & Phân Quyền'),
+        centerTitle: true,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -140,7 +144,7 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Chia se cong viec voi nguoi khac:',
+                    'Chia sẻ công việc với người khác:',
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
@@ -150,7 +154,7 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
                         child: TextField(
                           controller: _searchController,
                           decoration: InputDecoration(
-                            hintText: 'Nhap email hoac ten...',
+                            hintText: 'Nhập email hoặc họ tên...',
                             prefixIcon: const Icon(Icons.search),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -161,19 +165,19 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
                       const SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: () => _searchUsers(_searchController.text),
-                        child: const Text('Tim'),
+                        child: const Text('Tìm'),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Text('Quyen mac dinh khi chia se: '),
+                      const Text('Quyền mặc định khi chia sẻ: '),
                       DropdownButton<String>(
                         value: _selectedPermission,
                         items: const [
-                          DropdownMenuItem(value: 'viewer', child: Text('Chi xem (Viewer)')),
-                          DropdownMenuItem(value: 'editor', child: Text('Chinh sua (Editor)')),
+                          DropdownMenuItem(value: 'viewer', child: Text('Chỉ xem (Viewer)')),
+                          DropdownMenuItem(value: 'editor', child: Text('Chỉnh sửa (Editor)')),
                         ],
                         onChanged: (val) {
                           if (val != null) setState(() => _selectedPermission = val);
@@ -199,14 +203,16 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
                           final user = _searchResults[index];
                           final isAlready = _shares.any((s) => s.user != null && s.user!.id == user.id);
                           return ListTile(
-                            leading: CircleAvatar(child: Text(user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : '?')),
+                            leading: CircleAvatar(
+                              child: Text(user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : '?'),
+                            ),
                             title: Text(user.fullName),
                             subtitle: Text(user.email),
                             trailing: isAlready
-                                ? const Chip(label: Text('Da chia se', style: TextStyle(fontSize: 12)))
+                                ? const Chip(label: Text('Đã chia sẻ', style: TextStyle(fontSize: 12)))
                                 : ElevatedButton.icon(
                                     icon: const Icon(Icons.share, size: 16),
-                                    label: const Text('Chia se'),
+                                    label: const Text('Chia sẻ'),
                                     onPressed: () => _addShare(user),
                                   ),
                           );
@@ -216,14 +222,14 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
                   ],
                   const SizedBox(height: 24),
                   const Text(
-                    'Danh sach duoc chia se:',
+                    'Danh sách người được chia sẻ:',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   if (_shares.isEmpty)
                     const Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: Text('Chua chia se voi ai', style: TextStyle(color: Colors.grey)),
+                      child: Text('Chưa chia sẻ với ai', style: TextStyle(color: Colors.grey)),
                     )
                   else
                     ListView.builder(
@@ -243,7 +249,7 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
                               foregroundColor: Colors.white,
                               child: Text(user?.fullName.isNotEmpty == true ? user!.fullName[0].toUpperCase() : '?'),
                             ),
-                            title: Text(user?.fullName ?? 'Nguoi dung'),
+                            title: Text(user?.fullName ?? 'Người dùng'),
                             subtitle: Text(user?.email ?? ''),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -252,8 +258,14 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
                                   value: share.permission,
                                   underline: const SizedBox(),
                                   items: const [
-                                    DropdownMenuItem(value: 'viewer', child: Text('Viewer', style: TextStyle(color: Colors.indigo, fontWeight: FontWeight.bold))),
-                                    DropdownMenuItem(value: 'editor', child: Text('Editor', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold))),
+                                    DropdownMenuItem(
+                                      value: 'viewer',
+                                      child: Text('Chỉ xem', style: TextStyle(color: Colors.indigo, fontWeight: FontWeight.bold)),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'editor',
+                                      child: Text('Chỉnh sửa', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
+                                    ),
                                   ],
                                   onChanged: (newVal) {
                                     if (newVal != null && newVal != share.permission) {
@@ -263,7 +275,7 @@ class _TaskSharingScreenState extends State<TaskSharingScreen> {
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.delete_outline, color: Colors.red),
-                                  tooltip: 'Thu hoi quyen',
+                                  tooltip: 'Thu hồi quyền',
                                   onPressed: () => _revokeShare(share),
                                 ),
                               ],

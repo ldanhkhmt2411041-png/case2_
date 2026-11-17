@@ -21,7 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mat khau xac nhan khong khop!')),
+        const SnackBar(content: Text('Mật khẩu xác nhận không khớp!')),
       );
       return;
     }
@@ -40,11 +40,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (result['success']) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Dang ky thanh cong! Vui long dang nhap.')),
+        const SnackBar(content: Text('Đăng ký tài khoản thành công! Vui lòng đăng nhập.')),
       );
       Navigator.pop(context);
     } else {
-      final msg = result['message'] ?? result['data']?['message'] ?? 'Dang ky that bai';
+      final msg = result['message'] ?? result['data']?['message'] ?? 'Đăng ký thất bại';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg)),
       );
@@ -54,7 +54,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Dang Ky Tai Khoan')),
+      appBar: AppBar(
+        title: const Text('Đăng Ký Tài Khoản'),
+        centerTitle: true,
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -63,52 +66,77 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const Icon(Icons.person_add_alt_1, size: 70, color: Colors.blue),
+                const SizedBox(height: 16),
+                const Center(
+                  child: Text(
+                    'TẠO TÀI KHOẢN MỚI',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueGrey,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Ho va Ten',
-                    prefixIcon: Icon(Icons.person),
+                    labelText: 'Họ và Tên',
+                    prefixIcon: Icon(Icons.person_outline),
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) => value == null || value.isEmpty ? 'Vui long nhap ho ten' : null,
+                  validator: (value) => value == null || value.trim().isEmpty ? 'Vui lòng nhập họ và tên' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
+                    labelText: 'Địa chỉ Email',
+                    prefixIcon: Icon(Icons.email_outlined),
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) => value == null || value.isEmpty ? 'Vui long nhap email' : null,
+                  validator: (value) => value == null || value.trim().isEmpty ? 'Vui lòng nhập địa chỉ email' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
                   decoration: const InputDecoration(
-                    labelText: 'Mat khau',
-                    prefixIcon: Icon(Icons.lock),
+                    labelText: 'Mật khẩu',
+                    prefixIcon: Icon(Icons.lock_outline),
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) => value != null && value.length < 6 ? 'Mat khau toi thieu 6 ky tu' : null,
+                  validator: (value) => value != null && value.length < 6 ? 'Mật khẩu phải có tối thiểu 6 ký tự' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: true,
                   decoration: const InputDecoration(
-                    labelText: 'Xac nhan mat khau',
-                    prefixIcon: Icon(Icons.lock_outline),
+                    labelText: 'Xác nhận Mật khẩu',
+                    prefixIcon: Icon(Icons.lock_reset),
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) => value == null || value.isEmpty ? 'Vui long xac nhan mat khau' : null,
+                  validator: (value) => value == null || value.isEmpty ? 'Vui lòng xác nhận lại mật khẩu' : null,
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _handleRegister,
-                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                  child: _isLoading ? const CircularProgressIndicator() : const Text('Dang Ky'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Đăng Ký', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Đã có tài khoản? Đăng nhập ngay'),
                 ),
               ],
             ),

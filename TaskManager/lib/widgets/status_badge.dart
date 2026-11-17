@@ -8,12 +8,12 @@ class StatusBadge extends StatelessWidget {
   String get label {
     switch (status) {
       case 'in_progress':
-        return 'Dang lam';
+        return 'Đang thực hiện';
       case 'completed':
-        return 'Da xong';
+        return 'Đã hoàn thành';
       case 'todo':
       default:
-        return 'Chua lam';
+        return 'Chưa thực hiện';
     }
   }
 

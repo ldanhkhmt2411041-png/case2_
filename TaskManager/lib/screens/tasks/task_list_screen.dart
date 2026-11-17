@@ -94,7 +94,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
         return Colors.orange;
       case 'low':
       default:
-        return Colors.grey;
+        return Colors.blue;
     }
   }
 
@@ -103,10 +103,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
       case 'high':
         return 'Cao';
       case 'medium':
-        return 'TB';
+        return 'Trung bình';
       case 'low':
       default:
-        return 'Thap';
+        return 'Thấp';
     }
   }
 
@@ -114,14 +114,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quan Ly Cong Viec'),
+        title: const Text('Quản Lý Công Việc'),
         actions: [
           // Notification Icon with Badge
           Stack(
             children: [
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
-                tooltip: 'Thong bao',
+                tooltip: 'Thông báo',
                 onPressed: () async {
                   await Navigator.push(
                     context,
@@ -160,7 +160,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           // Profile & Stats Icon
           IconButton(
             icon: const Icon(Icons.account_circle_outlined),
-            tooltip: 'Ca nhan & Thong ke',
+            tooltip: 'Hồ sơ & Thống kê',
             onPressed: () async {
               await Navigator.push(
                 context,
@@ -171,6 +171,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Làm mới',
             onPressed: _loadData,
           ),
         ],
@@ -183,7 +184,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Tim kiem cong viec...',
+                hintText: 'Tìm kiếm công việc...',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
@@ -212,7 +213,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             child: Row(
               children: [
                 ChoiceChip(
-                  label: const Text('Tat ca'),
+                  label: const Text('Tất cả'),
                   selected: _selectedScope == '',
                   onSelected: (val) {
                     if (val) {
@@ -223,7 +224,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 ),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                  label: const Text('Cua toi'),
+                  label: const Text('Của tôi tạo'),
                   selected: _selectedScope == 'created',
                   onSelected: (val) {
                     if (val) {
@@ -234,7 +235,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 ),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                  label: const Text('Duoc giao'),
+                  label: const Text('Được giao'),
                   selected: _selectedScope == 'assigned',
                   onSelected: (val) {
                     if (val) {
@@ -245,7 +246,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 ),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                  label: const Text('Duoc chia se'),
+                  label: const Text('Được chia sẻ'),
                   selected: _selectedScope == 'shared',
                   onSelected: (val) {
                     if (val) {
@@ -272,10 +273,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       border: OutlineInputBorder(),
                     ),
                     items: const [
-                      DropdownMenuItem(value: '', child: Text('Trang thai: Tat ca')),
-                      DropdownMenuItem(value: 'todo', child: Text('Chua lam')),
-                      DropdownMenuItem(value: 'in_progress', child: Text('Dang lam')),
-                      DropdownMenuItem(value: 'completed', child: Text('Da xong')),
+                      DropdownMenuItem(value: '', child: Text('Trạng thái: Tất cả')),
+                      DropdownMenuItem(value: 'todo', child: Text('Chưa thực hiện')),
+                      DropdownMenuItem(value: 'in_progress', child: Text('Đang thực hiện')),
+                      DropdownMenuItem(value: 'completed', child: Text('Đã hoàn thành')),
                     ],
                     onChanged: (val) {
                       if (val != null) {
@@ -295,9 +296,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                       border: OutlineInputBorder(),
                     ),
                     items: const [
-                      DropdownMenuItem(value: '', child: Text('Uu tien: Tat ca')),
-                      DropdownMenuItem(value: 'low', child: Text('Thap')),
-                      DropdownMenuItem(value: 'medium', child: Text('Trung binh')),
+                      DropdownMenuItem(value: '', child: Text('Ưu tiên: Tất cả')),
+                      DropdownMenuItem(value: 'low', child: Text('Thấp')),
+                      DropdownMenuItem(value: 'medium', child: Text('Trung bình')),
                       DropdownMenuItem(value: 'high', child: Text('Cao')),
                     ],
                     onChanged: (val) {
@@ -317,7 +318,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _tasks.isEmpty
-                    ? const Center(child: Text('Khong co cong viec nao'))
+                    ? const Center(
+                        child: Text(
+                          'Không có công việc nào',
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      )
                     : RefreshIndicator(
                         onRefresh: _loadData,
                         child: ListView.builder(
@@ -328,7 +334,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             final isDone = task.status == 'completed';
 
                             return Card(
+                              elevation: 2,
                               margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                               child: ListTile(
                                 leading: IconButton(
                                   icon: Icon(
@@ -347,13 +355,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    if (task.description.isNotEmpty)
+                                    if (task.description.isNotEmpty) ...[
+                                      const SizedBox(height: 2),
                                       Text(
                                         task.description,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 12),
                                       ),
-                                    const SizedBox(height: 4),
+                                    ],
+                                    const SizedBox(height: 6),
                                     Row(
                                       children: [
                                         Container(
@@ -415,12 +426,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: 'Thêm công việc',
         onPressed: () async {
           final created = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const TaskCreateScreen()),
           );
-          if (created == true) _loadData();
+          if (created == true) {
+            _loadData();
+          }
         },
         child: const Icon(Icons.add),
       ),

@@ -47,16 +47,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cap Nhat Ho So'),
+        title: const Text('Cập Nhật Hồ Sơ'),
         content: TextField(
           controller: controller,
           decoration: const InputDecoration(
-            labelText: 'Ho va ten',
+            labelText: 'Họ và tên',
             border: OutlineInputBorder(),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Huy')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
           ElevatedButton(
             onPressed: () async {
               final newName = controller.text.trim();
@@ -65,13 +65,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (success && mounted) {
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Cap nhat thong tin thanh cong!')),
+                    const SnackBar(content: Text('Cập nhật thông tin thành công!')),
                   );
                   _loadAllData();
                 }
               }
             },
-            child: const Text('Luu'),
+            child: const Text('Lưu'),
           ),
         ],
       ),
@@ -86,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Doi Mat Khau'),
+        title: const Text('Đổi Mật Khẩu'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -95,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 controller: currentPassController,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText: 'Mat khau hien tai',
+                  labelText: 'Mật khẩu hiện tại',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -104,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 controller: newPassController,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText: 'Mat khau moi',
+                  labelText: 'Mật khẩu mới',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -113,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 controller: confirmPassController,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText: 'Xac nhan mat khau moi',
+                  labelText: 'Xác nhận mật khẩu mới',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -121,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Huy')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
           ElevatedButton(
             onPressed: () async {
               final cur = currentPassController.text;
@@ -130,13 +130,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               if (cur.isEmpty || next.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Vui long dien day du thong tin')),
+                  const SnackBar(content: Text('Vui lòng điền đầy đủ thông tin')),
                 );
                 return;
               }
               if (next != conf) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mat khau xac nhan khong khop')),
+                  const SnackBar(content: Text('Mật khẩu xác nhận không khớp')),
                 );
                 return;
               }
@@ -145,11 +145,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (mounted) {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(result['message'])),
+                  SnackBar(content: Text(result['message'] ?? 'Thành công')),
                 );
               }
             },
-            child: const Text('Doi mat khau'),
+            child: const Text('Đổi mật khẩu'),
           ),
         ],
       ),
@@ -188,10 +188,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ca Nhan & Thong Ke'),
+        title: const Text('Hồ Sơ & Thống Kê'),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Làm mới',
             onPressed: _loadAllData,
           ),
         ],
@@ -228,7 +230,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _user?.fullName ?? 'Nguoi dung',
+                                    _user?.fullName ?? 'Người dùng',
                                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 4),
@@ -248,8 +250,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 }
                               },
                               itemBuilder: (context) => const [
-                                PopupMenuItem(value: 'edit', child: Text('Cap nhat ho so')),
-                                PopupMenuItem(value: 'password', child: Text('Doi mat khau')),
+                                PopupMenuItem(value: 'edit', child: Text('Cập nhật hồ sơ')),
+                                PopupMenuItem(value: 'password', child: Text('Đổi mật khẩu')),
                               ],
                             ),
                           ],
@@ -260,46 +262,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     // SECTION 1: Status Statistics
                     const Text(
-                      'Thong ke theo trang thai cong viec',
+                      'Thống kê theo trạng thái công việc',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _buildStatCard('Chua lam', '${_taskStats['todo']}', Colors.blue, Icons.list_alt),
-                        _buildStatCard('Dang lam', '${_taskStats['inProgress']}', Colors.orange, Icons.run_circle_outlined),
-                        _buildStatCard('Da xong', '${_taskStats['completed']}', Colors.green, Icons.check_circle_outline),
+                        _buildStatCard('Chưa thực hiện', '${_taskStats['todo']}', Colors.blue, Icons.list_alt),
+                        _buildStatCard('Đang thực hiện', '${_taskStats['inProgress']}', Colors.orange, Icons.run_circle_outlined),
+                        _buildStatCard('Đã hoàn thành', '${_taskStats['completed']}', Colors.green, Icons.check_circle_outline),
                       ],
                     ),
                     const SizedBox(height: 20),
 
                     // SECTION 2: Assignment Statistics
                     const Text(
-                      'Thong ke cong viec theo vai tro',
+                      'Thống kê công việc theo vai trò',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _buildStatCard('Duoc giao', '${_assignmentStats['assigned']}', Colors.indigo, Icons.assignment_turned_in),
-                        _buildStatCard('Phu trach chinh', '${_assignmentStats['primary']}', Colors.amber.shade800, Icons.star_border),
-                        _buildStatCard('Cua toi tao', '${_assignmentStats['created']}', Colors.teal, Icons.create_new_folder_outlined),
-                        _buildStatCard('Duoc chia se', '${_assignmentStats['shared']}', Colors.purple, Icons.share),
+                        _buildStatCard('Được giao', '${_assignmentStats['assigned']}', Colors.indigo, Icons.assignment_turned_in),
+                        _buildStatCard('Phụ trách chính', '${_assignmentStats['primary']}', Colors.amber.shade800, Icons.star_border),
+                        _buildStatCard('Của tôi tạo', '${_assignmentStats['created']}', Colors.teal, Icons.create_new_folder_outlined),
+                        _buildStatCard('Được chia sẻ', '${_assignmentStats['shared']}', Colors.purple, Icons.share),
                       ],
                     ),
                     const SizedBox(height: 20),
 
                     // SECTION 3: Deadlines Statistics
                     const Text(
-                      'Theo doi han hoan thanh',
+                      'Theo dõi hạn hoàn thành',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _buildStatCard('Sap den han (<48h)', '${_deadlineStats['upcoming']}', Colors.amber.shade900, Icons.timer),
-                        _buildStatCard('Qua han', '${_deadlineStats['overdue']}', Colors.red.shade700, Icons.warning_amber_rounded),
-                        _buildStatCard('Da hoan tat', '${_deadlineStats['completed']}', Colors.green.shade700, Icons.task_alt),
+                        _buildStatCard('Sắp đến hạn (<48h)', '${_deadlineStats['upcoming']}', Colors.amber.shade900, Icons.timer),
+                        _buildStatCard('Quá hạn', '${_deadlineStats['overdue']}', Colors.red.shade700, Icons.warning_amber_rounded),
+                        _buildStatCard('Đã hoàn tất', '${_deadlineStats['completed']}', Colors.green.shade700, Icons.task_alt),
                       ],
                     ),
                     const SizedBox(height: 32),
@@ -315,16 +317,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         icon: const Icon(Icons.logout),
-                        label: const Text('Dang Xuat Khoi He Thong', style: TextStyle(fontWeight: FontWeight.bold)),
+                        label: const Text('Đăng Xuất Khỏi Hệ Thống', style: TextStyle(fontWeight: FontWeight.bold)),
                         onPressed: () async {
                           final confirm = await showDialog<bool>(
                             context: context,
                             builder: (ctx) => AlertDialog(
-                              title: const Text('Xac nhan dang xuat'),
-                              content: const Text('Ban co chac chan muon dang xuat khong?'),
+                              title: const Text('Xác nhận đăng xuất'),
+                              content: const Text('Bạn có chắc chắn muốn đăng xuất không?'),
                               actions: [
-                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Huy')),
-                                TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Dang xuat', style: TextStyle(color: Colors.red))),
+                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Hủy')),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, true),
+                                  child: const Text('Đăng xuất', style: TextStyle(color: Colors.red)),
+                                ),
                               ],
                             ),
                           );

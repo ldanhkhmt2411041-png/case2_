@@ -92,15 +92,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Thong Bao'),
+        title: const Text('Thông Báo'),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.done_all),
-            tooltip: 'Danh dau tat ca da doc',
+            tooltip: 'Đánh dấu tất cả đã đọc',
             onPressed: _markAllRead,
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Làm mới',
             onPressed: _loadNotifications,
           ),
         ],
@@ -114,7 +116,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     children: [
                       Icon(Icons.notifications_off_outlined, size: 64, color: Colors.grey),
                       SizedBox(height: 12),
-                      Text('Ban khong co thong bao nao', style: TextStyle(color: Colors.grey)),
+                      Text('Bạn không có thông báo nào', style: TextStyle(color: Colors.grey, fontSize: 16)),
                     ],
                   ),
                 )

@@ -41,7 +41,7 @@ class AuthService {
         await prefs.setString('jwt_token', data['token']);
         return {'success': true, 'data': data};
       }
-      return {'success': false, 'message': data['message'] ?? 'Dang nhap that bai'};
+      return {'success': false, 'message': data['message'] ?? 'Đăng nhập thất bại'};
     } catch (e) {
       return {'success': false, 'message': e.toString()};
     }
@@ -93,7 +93,7 @@ class AuthService {
   static Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) async {
     try {
       final token = await getToken();
-      if (token == null) return {'success': false, 'message': 'Chua dang nhap'};
+      if (token == null) return {'success': false, 'message': 'Chưa đăng nhập'};
 
       final response = await http.put(
         Uri.parse('$baseUrl/change-password'),
@@ -110,7 +110,7 @@ class AuthService {
       final body = jsonDecode(response.body);
       return {
         'success': response.statusCode == 200,
-        'message': body['message'] ?? (response.statusCode == 200 ? 'Doi mat khau thanh cong' : 'Doi mat khau that bai')
+        'message': body['message'] ?? (response.statusCode == 200 ? 'Đổi mật khẩu thành công' : 'Đổi mật khẩu thất bại')
       };
     } catch (e) {
       return {'success': false, 'message': e.toString()};

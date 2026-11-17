@@ -48,7 +48,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cap nhat cong viec that bai')),
+        const SnackBar(content: Text('Cập nhật công việc thất bại')),
       );
     }
   }
@@ -56,7 +56,10 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Chinh Sua Cong Viec')),
+      appBar: AppBar(
+        title: const Text('Chỉnh Sửa Công Việc'),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Form(
@@ -67,17 +70,17 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
-                  labelText: 'Tieu de cong viec',
+                  labelText: 'Tiêu đề công việc',
                   border: OutlineInputBorder(),
                 ),
-                validator: (val) => val == null || val.isEmpty ? 'Vui long nhap tieu de' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? 'Vui lòng nhập tiêu đề công việc' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descController,
                 maxLines: 4,
                 decoration: const InputDecoration(
-                  labelText: 'Mo ta chi tiet',
+                  labelText: 'Mô tả chi tiết',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -85,12 +88,12 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
               DropdownButtonFormField<String>(
                 value: _priority,
                 decoration: const InputDecoration(
-                  labelText: 'Muc do uu tien',
+                  labelText: 'Mức độ ưu tiên',
                   border: OutlineInputBorder(),
                 ),
                 items: const [
-                  DropdownMenuItem(value: 'low', child: Text('Thap')),
-                  DropdownMenuItem(value: 'medium', child: Text('Trung binh')),
+                  DropdownMenuItem(value: 'low', child: Text('Thấp')),
+                  DropdownMenuItem(value: 'medium', child: Text('Trung bình')),
                   DropdownMenuItem(value: 'high', child: Text('Cao')),
                 ],
                 onChanged: (val) {
@@ -101,13 +104,13 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
               DropdownButtonFormField<String>(
                 value: _status,
                 decoration: const InputDecoration(
-                  labelText: 'Trang thai',
+                  labelText: 'Trạng thái',
                   border: OutlineInputBorder(),
                 ),
                 items: const [
-                  DropdownMenuItem(value: 'todo', child: Text('Chua thuc hien')),
-                  DropdownMenuItem(value: 'in_progress', child: Text('Dang thuc hien')),
-                  DropdownMenuItem(value: 'completed', child: Text('Da hoan thanh')),
+                  DropdownMenuItem(value: 'todo', child: Text('Chưa thực hiện')),
+                  DropdownMenuItem(value: 'in_progress', child: Text('Đang thực hiện')),
+                  DropdownMenuItem(value: 'completed', child: Text('Đã hoàn thành')),
                 ],
                 onChanged: (val) {
                   if (val != null) setState(() => _status = val);
@@ -116,8 +119,15 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleUpdate,
-                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                child: _isLoading ? const CircularProgressIndicator() : const Text('Cap Nhat'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Lưu Thay Đổi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ],
           ),

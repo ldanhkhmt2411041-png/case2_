@@ -64,7 +64,7 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
   Future<void> _addAssignee(User user) async {
     if (_assignees.any((u) => u.id == user.id)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nguoi dung nay da duoc giao viec')),
+        const SnackBar(content: Text('Người dùng này đã được giao việc')),
       );
       return;
     }
@@ -77,7 +77,7 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Da giao viec cho ${user.fullName}')),
+        SnackBar(content: Text('Đã giao việc cho ${user.fullName}')),
       );
       _searchController.clear();
       setState(() => _searchResults = []);
@@ -89,7 +89,7 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
     final success = await TaskService.updatePrimaryAssignee(widget.task.id, user.id);
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Da chon ${user.fullName} la nguoi phu trach chinh')),
+        SnackBar(content: Text('Đã chọn ${user.fullName} là người phụ trách chính')),
       );
       _loadAssignees();
     }
@@ -99,11 +99,14 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Xac nhan'),
-        content: Text('Huy giao viec cho ${user.fullName}?'),
+        title: const Text('Xác nhận'),
+        content: Text('Bạn có chắc chắn muốn hủy giao việc cho ${user.fullName}?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Huy')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Dong y', style: TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Hủy')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Đồng ý', style: TextStyle(color: Colors.red)),
+          ),
         ],
       ),
     );
@@ -120,7 +123,8 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Giao Cong Viec'),
+        title: const Text('Giao Công Việc'),
+        centerTitle: true,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -135,7 +139,7 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Tim kiem nguoi dung de giao viec:',
+                    'Tìm kiếm người dùng để giao việc:',
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
@@ -145,7 +149,7 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
                         child: TextField(
                           controller: _searchController,
                           decoration: InputDecoration(
-                            hintText: 'Nhap email hoac ten...',
+                            hintText: 'Nhập email hoặc họ tên...',
                             prefixIcon: const Icon(Icons.search),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -156,7 +160,7 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
                       const SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: () => _searchUsers(_searchController.text),
-                        child: const Text('Tim'),
+                        child: const Text('Tìm'),
                       ),
                     ],
                   ),
@@ -178,11 +182,13 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
                           final user = _searchResults[index];
                           final isAlready = _assignees.any((u) => u.id == user.id);
                           return ListTile(
-                            leading: CircleAvatar(child: Text(user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : '?')),
+                            leading: CircleAvatar(
+                              child: Text(user.fullName.isNotEmpty ? user.fullName[0].toUpperCase() : '?'),
+                            ),
                             title: Text(user.fullName),
                             subtitle: Text(user.email),
                             trailing: isAlready
-                                ? const Chip(label: Text('Da giao', style: TextStyle(fontSize: 12)))
+                                ? const Chip(label: Text('Đã giao', style: TextStyle(fontSize: 12)))
                                 : ElevatedButton.icon(
                                     icon: const Icon(Icons.person_add, size: 16),
                                     label: const Text('Giao'),
@@ -195,14 +201,14 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
                   ],
                   const SizedBox(height: 24),
                   const Text(
-                    'Danh sach nguoi duoc giao viec:',
+                    'Danh sách người được giao việc:',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   if (_assignees.isEmpty)
                     const Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: Text('Chua co ai duoc giao viec', style: TextStyle(color: Colors.grey)),
+                      child: Text('Chưa có ai được giao việc', style: TextStyle(color: Colors.grey)),
                     )
                   else
                     ListView.builder(
@@ -232,7 +238,7 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(color: Colors.amber.shade700),
                                     ),
-                                    child: const Text('Phu trach chinh', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.brown)),
+                                    child: const Text('Phụ trách chính', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.brown)),
                                   ),
                               ],
                             ),
@@ -253,7 +259,7 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
                                       children: [
                                         Icon(Icons.star, color: Colors.amber, size: 20),
                                         SizedBox(width: 8),
-                                        Text('Dat lam phu trach chinh'),
+                                        Text('Đặt làm phụ trách chính'),
                                       ],
                                     ),
                                   ),
@@ -263,7 +269,7 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
                                     children: [
                                       Icon(Icons.person_remove, color: Colors.red, size: 20),
                                       SizedBox(width: 8),
-                                      Text('Huy giao viec', style: TextStyle(color: Colors.red)),
+                                      Text('Hủy giao việc', style: TextStyle(color: Colors.red)),
                                     ],
                                   ),
                                 ),
